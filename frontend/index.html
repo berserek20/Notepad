@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button id="New" onclick="create()">New</button>
+        <input id="doc_id" type="text" />
+        <button onclick="assign()">Assign</button>
+
+        <p><label for="w3review">Docs</label></p>
+        <textarea id="w3review" name="w3review" rows="4" cols="50" ></textarea>
+        <br>
+        
+</body>
+<script>
+
+    var doc_id;
+
+    async function create(){
+        const response=await fetch(`http://localhost:5000/create-doc`);
+            doc_id=await response.json();
+            console.log(doc_id);
+    }
+    function assign(){
+        doc_id=document.getElementById("doc_id").value;
+    }
+  
+
+        setInterval(async()=>{
+            if(doc_id!==undefined){
+                const response=await fetch(`http://localhost:5000/get-updated-data`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({id:doc_id})
+                });
+                document.getElementById("w3review").innerText=await response.json();
+            }
+        },1000);
+    
+  
+    document.getElementById('w3review').addEventListener('change',async e => {
+        // console.log(e.target.selectionStart);
+        
+        await fetch(`http://localhost:5000/update-doc`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type':
+                    'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({id:doc_id,pos:e.target.selectionStart,text:e.target.value.charAt(e.target.selectionStart-1)})
+        });
+    });
+</script>
+</html>
